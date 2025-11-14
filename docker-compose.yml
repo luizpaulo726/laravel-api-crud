@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel-api-app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    networks:
+      - app-network
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:alpine
+    container_name: laravel-api-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"         # acessa em http://localhost:8000
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: laravel-api-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel_api
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
+    ports:
+    - "3307:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+
+volumes:
+  db-data:
+
+networks:
+  app-network:
