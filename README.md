@@ -1,59 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Laravel API CRUD – Livros & Autores 📚
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este projeto é uma API em Laravel para gerenciar autores e livros, com:
 
-## About Laravel
+- CRUD completo de Authors e Books
+- Autenticação de usuários com Laravel Sanctum (login e logout)
+- Endpoint para reset de senha
+- Documentação da API com Swagger
+- Ambiente pronto com Docker + MySQL
+- Testes automatizados com PHPUnit
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+1. Tecnologias utilizadas
+- PHP 8.2+
+- Laravel 12
+- Laravel Sanctum
+- MySQL 8 (via Docker)
+- Docker e Docker Compose
+- Swagger (L5-Swagger)
+- PHPUnit
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+2. Como rodar o projeto com Docker
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+2.1. Clonar o repositório
 
-## Learning Laravel
+git clone https://github.com/luizpaulo726/laravel-api-crud.git
+cd laravel-api-crud
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+2.2. Copiar o arquivo de ambiente
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+cp .env.example .env
 
-## Laravel Sponsors
+No .env, deixe a parte do banco assim (para usar o MySQL do Docker):
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=laravel_api
+DB_USERNAME=laravel
+DB_PASSWORD=laravel
 
-### Premium Partners
+2.3. Subir os containers
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+docker compose up -d --build
 
-## Contributing
+Isso vai subir:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- app  → PHP / Laravel
+- nginx → servidor web (porta 8000)
+- mysql → banco de dados (porta 3307 no host)
 
-## Code of Conduct
+2.4. Instalar as dependências do Laravel
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+docker compose exec app composer install
 
-## Security Vulnerabilities
+2.5. Gerar a chave da aplicação
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+docker compose exec app php artisan key:generate
 
-## License
+2.6. Rodar as migrations
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+docker compose exec app php artisan migrate
+
+Depois disso o banco já estará pronto com as tabelas necessárias.
+
+3. Endpoints principais
+
+A API está disponível em:
+
+http://localhost:8000
+
+3.1. Autenticação
+
+- POST /api/auth/register – Registrar um novo usuário
+- POST /api/auth/login – Fazer login e receber um token
+- POST /api/auth/logout – Logout (revoga o token atual)
+
+As rotas protegidas usam Bearer Token (Sanctum).
+Depois do login, envie o header:
+
+Authorization: Bearer SEU_TOKEN_AQUI
+Accept: application/json
+
+3.2. Authors
+
+CRUD de autores (rotas protegidas por autenticação):
+
+- GET    /api/authors – Listar autores
+- POST   /api/authors – Criar autor
+- GET    /api/authors/{id} – Detalhar autor
+- PUT    /api/authors/{id} – Atualizar autor
+- DELETE /api/authors/{id} – Remover autor
+
+3.3. Books
+
+CRUD de livros (também protegido):
+
+- GET    /api/books – Listar livros
+- POST   /api/books – Criar livro
+- GET    /api/books/{id} – Detalhar livro
+- PUT    /api/books/{id} – Atualizar livro
+- DELETE /api/books/{id} – Remover livro
+
+4. Documentação Swagger
+
+La documentação interativa da API está disponível em:
+
+http://localhost:8000/api/documentation
+
+Por lá você consegue:
+
+- Ver todos os endpoints
+- Enviar requisições diretamente pela interface
+- Testar autenticação com Bearer Token
+
+5. Testes automatizados
+
+Os testes usam PHPUnit e cobrem os fluxos de:
+
+- Autenticação
+- CRUD de Authors
+- CRUD de Books
+
+Para rodar os testes:
+
+docker compose exec app php artisan test
+
+6. Coleção do Postman
+
+O repositório contém uma coleção do Postman com os principais endpoints da API
+(endpoints de autenticação, autores e livros).
+
+Basta importar o arquivo de coleção (*.postman_collection.json) no Postman e:
+
+1. Fazer login para obter o token
+2. Configurar o header Authorization: Bearer <token>
+3. Testar os endpoints de Authors e Books
+
+7. Rodar sem Docker (opcional)
+
+Se preferir rodar sem Docker, você vai precisar de:
+
+- PHP 8.2+
+- Composer
+- MySQL
+- Extensões do PHP compatíveis com Laravel
+
+Passos resumidos:
+
+composer install
+cp .env.example .env
+# Ajustar dados do banco no .env
+php artisan key:generate
+php artisan migrate
+php artisan serve
+
+A API ficará disponível em:
+
+http://localhost:8000
+
+Se tiver qualquer problema ao subir com Docker, rodar as migrations ou usar os endpoints, é só ajustar o .env conforme seu ambiente.
