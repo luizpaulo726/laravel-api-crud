@@ -1,4 +1,4 @@
-Laravel API CRUD – Livros & Autores 📚
+# Laravel API CRUD – Livros & Autores 📚
 
 Este projeto é uma API em Laravel para gerenciar autores e livros, com:
 
@@ -9,7 +9,7 @@ Este projeto é uma API em Laravel para gerenciar autores e livros, com:
 - Ambiente pronto com Docker + MySQL
 - Testes automatizados com PHPUnit
 
-1. Tecnologias utilizadas
+# 1. Tecnologias utilizadas
 - PHP 8.2+
 - Laravel 12
 - Laravel Sanctum
@@ -18,14 +18,14 @@ Este projeto é uma API em Laravel para gerenciar autores e livros, com:
 - Swagger (L5-Swagger)
 - PHPUnit
 
-2. Como rodar o projeto com Docker
+# 2. Como rodar o projeto com Docker
 
-2.1. Clonar o repositório
+# 2.1. Clonar o repositório
 
 git clone https://github.com/luizpaulo726/laravel-api-crud.git
 cd laravel-api-crud
 
-2.2. Copiar o arquivo de ambiente
+# 2.2. Copiar o arquivo de ambiente
 
 cp .env.example .env
 
@@ -38,7 +38,7 @@ DB_DATABASE=laravel_api
 DB_USERNAME=laravel
 DB_PASSWORD=laravel
 
-2.3. Subir os containers
+# 2.3. Subir os containers
 
 docker compose up -d --build
 
@@ -48,11 +48,11 @@ Isso vai subir:
 - nginx → servidor web (porta 8000)
 - mysql → banco de dados (porta 3307 no host)
 
-2.4. Instalar as dependências do Laravel
+# 2.4. Instalar as dependências do Laravel
 
 docker compose exec app composer install
 
-2.5. Gerar a chave da aplicação
+# 2.5. Gerar a chave da aplicação
 
 docker compose exec app php artisan key:generate
 
@@ -62,13 +62,13 @@ docker compose exec app php artisan migrate
 
 Depois disso o banco já estará pronto com as tabelas necessárias.
 
-3. Endpoints principais
+# 3. Endpoints principais
 
 A API está disponível em:
 
 http://localhost:8000
 
-3.1. Autenticação
+# 3.1. Autenticação
 
 - POST /api/auth/register – Registrar um novo usuário
 - POST /api/auth/login – Fazer login e receber um token
@@ -80,7 +80,7 @@ Depois do login, envie o header:
 Authorization: Bearer SEU_TOKEN_AQUI
 Accept: application/json
 
-3.2. Authors
+# 3.2. Authors
 
 CRUD de autores (rotas protegidas por autenticação):
 
@@ -90,7 +90,7 @@ CRUD de autores (rotas protegidas por autenticação):
 - PUT    /api/authors/{id} – Atualizar autor
 - DELETE /api/authors/{id} – Remover autor
 
-3.3. Books
+# 3.3. Books
 
 CRUD de livros (também protegido):
 
@@ -100,7 +100,7 @@ CRUD de livros (também protegido):
 - PUT    /api/books/{id} – Atualizar livro
 - DELETE /api/books/{id} – Remover livro
 
-4. Documentação Swagger
+# 4. Documentação Swagger
 
 La documentação interativa da API está disponível em:
 
@@ -112,7 +112,7 @@ Por lá você consegue:
 - Enviar requisições diretamente pela interface
 - Testar autenticação com Bearer Token
 
-5. Testes automatizados
+# 5. Testes automatizados
 
 Os testes usam PHPUnit e cobrem os fluxos de:
 
@@ -124,7 +124,7 @@ Para rodar os testes:
 
 docker compose exec app php artisan test
 
-6. Coleção do Postman
+# 6. Coleção do Postman
 
 O repositório contém uma coleção do Postman com os principais endpoints da API
 (endpoints de autenticação, autores e livros).
@@ -135,7 +135,7 @@ Basta importar o arquivo de coleção (*.postman_collection.json) no Postman e:
 2. Configurar o header Authorization: Bearer <token>
 3. Testar os endpoints de Authors e Books
 
-7. Rodar sem Docker (opcional)
+# 7. Rodar sem Docker (opcional)
 
 Se preferir rodar sem Docker, você vai precisar de:
 
