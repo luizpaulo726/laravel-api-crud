@@ -1,184 +1,436 @@
 # Laravel API CRUD – Livros & Autores 📚
 
-Este projeto é uma API em Laravel para gerenciar **autores** e **livros**, com:
+## 📋 Visão Geral
+
+O **Laravel API CRUD – Livros & Autores** é uma API REST construída em **Laravel 12** para gerenciar:
+
+- Authors (autores)  
+- Books (livros)
+
+Ela conta com:
 
 - CRUD completo de **Authors** e **Books**
-- Autenticação de usuários com **Laravel Sanctum** (login e logout)
+- Autenticação com **Laravel Sanctum** (login, logout)
 - Endpoint para **reset de senha**
-- Documentação da API com **Swagger**
-- Ambiente pronto com **Docker + MySQL**
+- Documentação da API com **Swagger** (`/api/documentation`)
+- Ambiente pronto com **Docker + Nginx + MySQL**
 - Testes automatizados com **PHPUnit**
 
 ---
 
-## 🚀 Tecnologias utilizadas
+## 📦 Requisitos
+
+Para usar com Docker:
+
+- Docker  
+- Docker Compose  
+
+Para rodar sem Docker (opcional):
 
 - PHP 8.2+
-- Laravel 12
-- Laravel Sanctum
-- MySQL 8 (via Docker)
-- Docker e Docker Compose
-- Swagger (L5-Swagger)
-- PHPUnit
+- Composer
+- MySQL 8
+- Extensões do PHP compatíveis com Laravel
 
 ---
 
-## 🐳 Como rodar o projeto com Docker
+## 🐳 Configuração com Docker
 
-### 1. Clonar o repositório
+### 1️⃣ Clonar o repositório
 
 ```bash
 git clone https://github.com/luizpaulo726/laravel-api-crud.git
 cd laravel-api-crud
-2. Copiar o arquivo de ambiente
-bash
-Copiar código
-cp .env.example .env
-No .env, deixe a parte do banco assim (para usar o MySQL do Docker):
+```
 
-env
-Copiar código
+### 2️⃣ Copiar o arquivo de ambiente
+
+```bash
+cp .env.example .env
+```
+
+No `.env`, configure o banco para usar o MySQL do Docker:
+
+```env
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
 DB_DATABASE=laravel_api
 DB_USERNAME=laravel
 DB_PASSWORD=laravel
-3. Subir os containers
-bash
-Copiar código
+```
+
+### 3️⃣ Subir os containers
+
+```bash
 docker compose up -d --build
+```
+
 Isso vai subir:
 
-app → PHP / Laravel
+- `app`   → PHP / Laravel  
+- `nginx` → servidor web (porta **8000**)  
+- `mysql` → banco de dados (porta **3307** no host)
 
-nginx → servidor web (porta 8000)
+### 4️⃣ Instalar as dependências do Laravel
 
-mysql → banco de dados (porta 3307 no host)
-
-4. Instalar as dependências do Laravel
-bash
-Copiar código
+```bash
 docker compose exec app composer install
-5. Gerar a chave da aplicação
-bash
-Copiar código
+```
+
+### 5️⃣ Gerar a chave da aplicação
+
+```bash
 docker compose exec app php artisan key:generate
-6. Rodar as migrations
-bash
-Copiar código
+```
+
+### 6️⃣ Rodar as migrations
+
+```bash
 docker compose exec app php artisan migrate
-Depois disso o banco já estará pronto com as tabelas necessárias.
+```
 
-🌐 Endpoints principais
-A API está disponível em:
+### 7️⃣ Gerar a documentação Swagger
 
-text
-Copiar código
+```bash
+docker compose exec app php artisan l5-swagger:generate
+```
+
+Depois disso, a API já estará disponível em:
+
+```text
 http://localhost:8000
-Autenticação
-POST /api/auth/register – Registrar um novo usuário
+```
 
-POST /api/auth/login – Fazer login e receber um token
+E a documentação Swagger em:
 
-POST /api/auth/logout – Logout (revoga o token atual)
+```text
+http://localhost:8000/api/documentation
+```
 
-As rotas protegidas usam Bearer Token (Sanctum).
-Depois do login, envie o header:
+---
 
-http
-Copiar código
+## 🐧 Somente Linux – Permissões de pasta
+
+Se ao acessar a API aparecer erro de **permissão em `storage`**, rode:
+
+```bash
+docker compose exec app bash
+
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+
+exit
+```
+
+
+
+---
+
+## 🔐 Autenticação
+
+### 🔸 Registro de usuário
+
+**Endpoint**
+
+```http
+POST /api/auth/register
+```
+
+**Body (JSON)**
+
+```json
+{
+  "name": "Luiz Paulo",
+  "email": "luiz@example.com",
+  "password": "senha123",
+  "password_confirmation": "senha123"
+}
+```
+
+---
+
+### 🔸 Login
+
+**Endpoint**
+
+```http
+POST /api/auth/login
+```
+
+**Body (JSON)**
+
+```json
+{
+  "email": "luiz@example.com",
+  "password": "senha123"
+}
+```
+
+**Resposta (exemplo)**
+
+```json
+{
+  "access_token": "1|abcdefg123456",
+  "token_type": "Bearer",
+  "user": {
+    "id": 1,
+    "name": "Luiz Paulo",
+    "email": "luiz@example.com"
+  }
+}
+```
+
+Use esse token nas rotas protegidas:
+
+```http
 Authorization: Bearer SEU_TOKEN_AQUI
 Accept: application/json
-Authors
-CRUD de autores (rotas protegidas por autenticação):
+```
 
-GET /api/authors – Listar autores
+---
 
-POST /api/authors – Criar autor
+### 🔸 Logout
 
-GET /api/authors/{id} – Detalhar autor
+**Endpoint**
 
-PUT /api/authors/{id} – Atualizar autor
+```http
+POST /api/auth/logout
+```
 
-DELETE /api/authors/{id} – Remover autor
+**Headers**
 
-Books
-CRUD de livros (também protegido):
+```http
+Authorization: Bearer SEU_TOKEN_AQUI
+Accept: application/json
+```
 
-GET /api/books – Listar livros
+---
 
-POST /api/books – Criar livro
+### 🔸 Esqueci minha senha
 
-GET /api/books/{id} – Detalhar livro
+**Endpoint**
 
-PUT /api/books/{id} – Atualizar livro
+```http
+POST /api/auth/forgot-password
+```
 
-DELETE /api/books/{id} – Remover livro
+**Body**
 
-📑 Documentação Swagger
-A documentação interativa da API está disponível em:
+```json
+{
+  "email": "luiz@example.com"
+}
+```
 
-text
-Copiar código
+O Laravel enviará um e-mail com o link de reset de senha contendo o `token`.
+
+---
+
+### 🔸 Reset de senha
+
+**Endpoint**
+
+```http
+POST /api/auth/reset-password
+```
+
+**Body**
+
+```json
+{
+  "token": "TOKEN_ENVIADO_POR_EMAIL",
+  "email": "luiz@example.com",
+  "password": "novasenha123",
+  "password_confirmation": "novasenha123"
+}
+```
+
+---
+
+## ✍️ CRUD – Authors
+
+Todas as rotas abaixo exigem autenticação (Bearer Token).
+
+### 🔹 Listar autores
+
+```http
+GET /api/authors
+```
+
+### 🔹 Criar autor
+
+```http
+POST /api/authors
+```
+
+**Body**
+
+```json
+{
+  "name": "Robert C. Martin",
+  "bio": "Autor de Clean Code e outros livros de boas práticas."
+}
+```
+
+### 🔹 Detalhar autor
+
+```http
+GET /api/authors/{id}
+```
+
+### 🔹 Atualizar autor
+
+```http
+PUT /api/authors/{id}
+```
+
+**Body**
+
+```json
+{
+  "name": "Robert C. Martin",
+  "bio": "Bio atualizada..."
+}
+```
+
+### 🔹 Remover autor
+
+```http
+DELETE /api/authors/{id}
+```
+
+---
+
+## 📚 CRUD – Books
+
+Também exigem autenticação (Bearer Token).
+
+### 🔹 Listar livros
+
+```http
+GET /api/books
+```
+
+### 🔹 Criar livro
+
+```http
+POST /api/books
+```
+
+**Body**
+
+```json
+{
+  "title": "Clean Code",
+  "description": "Um guia sobre boas práticas de código limpo.",
+  "published_year": 2008,
+  "author_id": 1
+}
+```
+
+### 🔹 Detalhar livro
+
+```http
+GET /api/books/{id}
+```
+
+### 🔹 Atualizar livro
+
+```http
+PUT /api/books/{id}
+```
+
+**Body**
+
+```json
+{
+  "title": "Clean Code (Edição Revisada)",
+  "description": "Descrição atualizada...",
+  "published_year": 2010,
+  "author_id": 1
+}
+```
+
+### 🔹 Remover livro
+
+```http
+DELETE /api/books/{id}
+```
+
+---
+
+## 📑 Documentação Swagger
+
+A documentação interativa da API está em:
+
+```text
 http://localhost:8000/api/documentation
+```
+
 Por lá você consegue:
 
-Ver todos os endpoints
+- Ver todos os endpoints  
+- Enviar requisições pela interface  
+- Testar autenticação com Bearer Token  
 
-Enviar requisições diretamente pela interface
+---
 
-Testar autenticação com Bearer Token
+## 🧪 Testes automatizados
 
-🧪 Testes automatizados
-Os testes usam PHPUnit e cobrem os fluxos de:
+Os testes utilizam **PHPUnit** e cobrem:
 
-Autenticação
+- Autenticação  
+- CRUD de Authors  
+- CRUD de Books  
 
-CRUD de Authors
+Para rodar:
 
-CRUD de Books
-
-Para rodar os testes:
-
-bash
-Copiar código
+```bash
 docker compose exec app php artisan test
-🧰 Coleção do Postman
-O repositório contém uma coleção do Postman com os principais endpoints da API
-(endpoints de autenticação, autores e livros).
+```
 
-Basta importar o arquivo de coleção (*.postman_collection.json) no Postman e:
+---
 
-Fazer login para obter o token
+## 🧰 Coleção do Postman
 
-Configurar o header Authorization: Bearer <token>
+O repositório contém uma coleção do Postman com os principais endpoints.
 
-Testar os endpoints de Authors e Books
+Passos:
 
-💡 Rodar sem Docker (opcional)
-Se preferir rodar sem Docker, você vai precisar de:
+1. Importar o arquivo `*.postman_collection.json` no Postman  
+2. Fazer login em `/api/auth/login` para obter o token  
+3. Configurar o header:
 
-PHP 8.2+
+   ```http
+   Authorization: Bearer SEU_TOKEN_AQUI
+   ```
 
-Composer
+4. Testar os endpoints de **Authors** e **Books**
 
-MySQL
+---
 
-Extensões do PHP compatíveis com Laravel
+## 💻 Rodando sem Docker (opcional)
 
-Passos resumidos:
+Se preferir rodar localmente:
 
-bash
-Copiar código
+```bash
 composer install
 cp .env.example .env
-# Ajustar dados do banco no .env
+# Ajuste as variáveis de banco no .env
 php artisan key:generate
 php artisan migrate
 php artisan serve
+```
+
 A API ficará disponível em:
 
-text
-Copiar código
+```text
 http://localhost:8000
+```
+
+E o Swagger em:
+
+```text
+http://localhost:8000/api/documentation
+```
